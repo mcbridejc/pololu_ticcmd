@@ -4,9 +4,15 @@ from typing import List
 def list_serials() -> List[str]:
     """Return a list of serial numbers detected
     """
-    return []
+    output = run_cmd(None, ['--list'])
+    serials = []
+    for line in output.splitlines():
+        stopidx = line.find(',')
+        if stopidx > 0:
+            serials.append(line[0:stopidx])
+    return serials
 
-def run_cmd(serial, args: List[str]):
+def run_cmd(serial, args: List[str]) -> str:
     command = ['ticcmd']
     if serial is not None:
         command += ['-d', serial] 
@@ -18,6 +24,8 @@ def run_cmd(serial, args: List[str]):
     if result.returncode != 0:
         cmd_s = " ".join(command)
         raise RuntimeError(f"Error executing \"{cmd_s}\": {str(result.stdout.decode('utf-8'))}")
+
+    return result.stdout.decode('utf-8')
 
 def set_options(
     serial: str=None,
